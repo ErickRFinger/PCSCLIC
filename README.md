@@ -9,13 +9,17 @@ Site de catálogo de produtos para PCs CLIC, desenvolvido com integração autom
 - **Responsivo**: Adaptável para dispositivos móveis e desktop
 - **Tempo Real**: Atualização automática dos produtos a cada 5 minutos
 - **WhatsApp Integration**: Botões de compra direcionam para WhatsApp
+- **Deploy Automático**: Configurado para GitHub + Render.com
 
 ## Estrutura de Arquivos
 ```
-SITE CLIC/
+PCSCLIC-main/
 ├── index.html          # Página principal
 ├── styles.css          # Estilos CSS com tema laranja/azul escuro
 ├── script.js           # JavaScript com integração Google Sheets
+├── package.json        # Configuração do projeto Node.js
+├── render.yaml         # Configuração para deploy no Render.com
+├── .gitignore          # Arquivos ignorados pelo Git
 ├── LOGOS/
 │   └── logo.png        # Logo laranja da empresa
 └── README.md           # Este arquivo
@@ -113,6 +117,157 @@ Para suporte ou dúvidas sobre o sistema, verifique:
 1. Console do navegador para logs de erro
 2. Status de sincronização na página
 3. Conectividade com a planilha Google Sheets
+
+## 🚀 Deploy no GitHub + Render.com
+
+### Passo 1: Preparar o Repositório GitHub
+
+1. **Criar repositório no GitHub:**
+   ```bash
+   # No terminal, navegue até a pasta do projeto
+   cd PCSCLIC-main
+   
+   # Inicializar Git (se ainda não foi feito)
+   git init
+   
+   # Adicionar arquivos
+   git add .
+   
+   # Fazer commit inicial
+   git commit -m "Initial commit: PCs CLIC catalog with Google Sheets integration"
+   
+   # Conectar ao repositório GitHub (substitua pela sua URL)
+   git remote add origin https://github.com/SEU-USUARIO/pcs-clic-catalog.git
+   
+   # Enviar para GitHub
+   git push -u origin main
+   ```
+
+2. **Configurar repositório público:**
+   - Certifique-se de que o repositório está público
+   - Adicione uma descrição: "Catálogo de produtos PCs CLIC"
+
+### Passo 2: Deploy no Render.com
+
+1. **Acesse [Render.com](https://render.com) e faça login**
+
+2. **Criar novo serviço:**
+   - Clique em "New +"
+   - Selecione "Web Service"
+   - Conecte sua conta GitHub
+
+3. **Configurar o serviço:**
+   ```
+   Name: pcs-clic-catalog
+   Environment: Static Site
+   Build Command: npm install && npm run build
+   Start Command: npx http-server . -p $PORT
+   ```
+
+4. **Configurações avançadas:**
+   - **Branch:** main
+   - **Root Directory:** (deixe vazio)
+   - **Environment:** Node
+   - **Node Version:** 18.x
+
+5. **Variáveis de ambiente (opcional):**
+   ```
+   NODE_ENV=production
+   ```
+
+6. **Deploy:**
+   - Clique em "Create Web Service"
+   - Aguarde o build (2-3 minutos)
+   - Seu site estará disponível em: `https://pcs-clic-catalog.onrender.com`
+
+### Passo 3: Configurações Pós-Deploy
+
+1. **Atualizar URLs no código (se necessário):**
+   - Edite `script.js` se precisar alterar URLs de API
+   - Edite `package.json` com a URL correta do seu repositório
+
+2. **Configurar domínio personalizado (opcional):**
+   - No Render.com, vá em Settings > Custom Domains
+   - Adicione seu domínio personalizado
+
+### Passo 4: Monitoramento
+
+1. **Logs do Render:**
+   - Acesse a aba "Logs" no dashboard do Render
+   - Monitore erros e performance
+
+2. **Atualizações automáticas:**
+   - Cada push no GitHub aciona novo deploy
+   - O site atualiza automaticamente
+
+## 🔧 Comandos Úteis
+
+### Desenvolvimento Local
+```bash
+# Instalar dependências
+npm install
+
+# Executar localmente
+npm start
+
+# Modo desenvolvimento
+npm run dev
+```
+
+### Git Workflow
+```bash
+# Fazer alterações e enviar
+git add .
+git commit -m "Descrição das alterações"
+git push origin main
+```
+
+### Verificar Deploy
+```bash
+# Verificar status do site
+curl -I https://pcs-clic-catalog.onrender.com
+
+# Testar funcionalidades
+# Acesse o site e teste:
+# - Carregamento de produtos
+# - Botões de WhatsApp
+# - Responsividade mobile
+```
+
+## 📱 Teste de Funcionalidades
+
+Após o deploy, teste:
+
+1. **✅ Carregamento da página**
+2. **✅ Exibição dos produtos da planilha**
+3. **✅ Botões de compra WhatsApp**
+4. **✅ Responsividade mobile**
+5. **✅ Sincronização automática (aguarde 5 minutos)**
+
+## 🆘 Solução de Problemas
+
+### Site não carrega
+- Verifique os logs no Render.com
+- Confirme que o repositório está público
+- Verifique se o build foi bem-sucedido
+
+### Produtos não aparecem
+- Verifique se a planilha Google Sheets está pública
+- Confirme a URL da planilha no `script.js`
+- Verifique o console do navegador para erros
+
+### WhatsApp não funciona
+- Verifique o número no `script.js`
+- Teste em dispositivo móvel
+- Confirme formato do número (+55...)
+
+## 📞 Suporte
+
+Para suporte técnico:
+1. Verifique os logs do Render.com
+2. Console do navegador (F12)
+3. Status da planilha Google Sheets
+4. Conectividade de rede
 
 ## Licença
 © 2024 PCs CLIC. Todos os direitos reservados.

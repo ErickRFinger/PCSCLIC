@@ -2,10 +2,27 @@
 // URL da planilha fornecida pelo usuário
 const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1b-5Azi9M7ySzPGj0vnyBWL5jdRpKMIhGyH5455B0S0g/edit?usp=sharing';
 
+// Configurações de produção
+const CONFIG = {
+    SYNC_INTERVAL: 300000, // 5 minutos
+    RETRY_ATTEMPTS: 3,
+    RETRY_DELAY: 1000,
+    CACHE_DURATION: 60000, // 1 minuto
+    WHATSAPP_NUMBER: '5549920014159'
+};
+
 // Variáveis globais
 let products = [];
 let lastCheckedFiles = new Set();
 let autoSyncInterval = null;
+let cache = {
+    data: null,
+    timestamp: null,
+    isValid: () => {
+        if (!cache.data || !cache.timestamp) return false;
+        return (Date.now() - cache.timestamp) < CONFIG.CACHE_DURATION;
+    }
+};
 
 // Elementos DOM - inicializados após DOM carregar
 let productsGrid, productModal, closeModal, modalBuyButton;
@@ -49,34 +66,49 @@ const PROXY_URLS = [
     'https://api.codetabs.com/v1/proxy?quest='
 ];
 
-// BUSCAR DADOS DA PLANILHA COM PROXY
+// BUSCAR DADOS DA PLANILHA COM PROXY E RETRY
 async function fetchProductsFromGoogleSheetsWithProxy() {
     console.log('📊 Buscando produtos da planilha com proxy...');
     
     const sheetUrl = GOOGLE_SHEETS_URL.replace('/edit?usp=sharing', '/export?format=csv&gid=0');
     
-    // Tentar diferentes proxies
+    // Tentar diferentes proxies com retry
     for (let i = 0; i < PROXY_URLS.length; i++) {
-        try {
-            const proxyUrl = PROXY_URLS[i] + encodeURIComponent(sheetUrl);
-            console.log(`🔄 Tentando proxy ${i + 1}: ${PROXY_URLS[i].split('/')[2]}`);
-            
-            const response = await fetch(proxyUrl, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'text/csv',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        for (let attempt = 1; attempt <= CONFIG.RETRY_ATTEMPTS; attempt++) {
+            try {
+                const proxyUrl = PROXY_URLS[i] + encodeURIComponent(sheetUrl);
+                console.log(`🔄 Tentando proxy ${i + 1}, tentativa ${attempt}: ${PROXY_URLS[i].split('/')[2]}`);
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+                
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'text/csv',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const csvText = await response.text();
+                    console.log('✅ Proxy funcionou! CSV carregado');
+                    
+                    // Atualizar cache
+                    cache.data = csvText;
+                    cache.timestamp = Date.now();
+                    
+                    return parseAndProcessProducts(csvText);
                 }
-            });
-            
-            if (response.ok) {
-                const csvText = await response.text();
-                console.log('✅ Proxy funcionou! CSV carregado');
-                return parseAndProcessProducts(csvText);
+            } catch (error) {
+                console.log(`❌ Proxy ${i + 1}, tentativa ${attempt} falhou:`, error.message);
+                if (attempt < CONFIG.RETRY_ATTEMPTS) {
+                    await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY * attempt));
+                }
             }
-        } catch (error) {
-            console.log(`❌ Proxy ${i + 1} falhou:`, error.message);
-            continue;
         }
     }
     
@@ -89,14 +121,33 @@ async function fetchProductsFromGoogleSheetsWithProxy() {
 async function fetchProductsFromGoogleSheets() {
     console.log('📊 Buscando produtos da planilha Google Sheets...');
     
+    // Verificar cache primeiro
+    if (cache.isValid()) {
+        console.log('📦 Usando dados do cache');
+        return parseAndProcessProducts(cache.data);
+    }
+    
     // Tentar primeiro sem proxy (funciona em servidores)
     try {
         const sheetUrl = GOOGLE_SHEETS_URL.replace('/edit?usp=sharing', '/export?format=csv&gid=0');
-        const response = await fetch(sheetUrl);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+        const response = await fetch(sheetUrl, {
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
         
         if (response.ok) {
             const csvText = await response.text();
             console.log('✅ Acesso direto funcionou');
+            
+            // Atualizar cache
+            cache.data = csvText;
+            cache.timestamp = Date.now();
+            
             return parseAndProcessProducts(csvText);
         }
     } catch (error) {
@@ -364,7 +415,7 @@ function renderProducts() {
 
 // Funções auxiliares
 function startAutoSync() {
-    // Sincronização em tempo real a cada 5 minutos
+    // Sincronização em tempo real baseada na configuração
     autoSyncInterval = setInterval(async () => {
         console.log('🔄 Sincronização em tempo real da planilha...');
         
@@ -383,9 +434,9 @@ function startAutoSync() {
         } catch (error) {
             console.log('⚠️ Erro na sincronização:', error.message);
         }
-    }, 300000); // 5 minutos
+    }, CONFIG.SYNC_INTERVAL);
     
-    console.log('⚡ SINCRONIZAÇÃO EM TEMPO REAL ATIVADA - verificando planilha a cada 5 minutos');
+    console.log(`⚡ SINCRONIZAÇÃO EM TEMPO REAL ATIVADA - verificando planilha a cada ${CONFIG.SYNC_INTERVAL / 60000} minutos`);
 }
 
 // Função para abrir modal do produto
@@ -432,7 +483,7 @@ function scrollToProducts() {
 
 // Função para comprar produto via WhatsApp
 function buyProduct(productName, productPrice) {
-    const phoneNumber = '5549920014159'; // Número do WhatsApp com código do país
+    const phoneNumber = CONFIG.WHATSAPP_NUMBER;
     const message = `Olá! Gostaria de adquirir o computador: *${productName}* por R$ ${productPrice.toFixed(2)}. 
 
 Este computador possui as seguintes especificações:

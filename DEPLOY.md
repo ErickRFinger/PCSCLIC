@@ -1,4 +1,4 @@
-# 🚀 Guia de Deploy - PCs CLIC
+# 🚀 Guia de Deploy - Clic Sistemas
 
 ## Pré-requisitos
 - Conta no GitHub
@@ -139,4 +139,4 @@ Para suporte técnico:
 4. Conectividade de rede
 
 ---
-**© 2024 PCs CLIC. Todos os direitos reservados.**
+**© 2025 Clic Sistemas. Todos os direitos reservados.**

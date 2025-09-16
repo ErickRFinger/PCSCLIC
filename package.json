@@ -1,7 +1,7 @@
 {
-  "name": "pcs-clic-catalog",
+  "name": "clic-sistemas-catalog",
   "version": "1.0.0",
-  "description": "Catálogo de produtos PCs CLIC com integração Google Sheets",
+  "description": "Clic Sistemas - Catálogo de Computadores com integração Google Sheets",
   "main": "index.html",
   "scripts": {
     "start": "npx http-server . -p 3000 -o",
@@ -10,12 +10,13 @@
   },
   "keywords": [
     "catalog",
-    "products",
+    "computers",
     "google-sheets",
     "whatsapp",
-    "ecommerce"
+    "ecommerce",
+    "clic-sistemas"
   ],
-  "author": "PCs CLIC",
+  "author": "Clic Sistemas",
   "license": "MIT",
   "devDependencies": {
     "http-server": "^14.1.1"
@@ -25,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/seu-usuario/pcs-clic-catalog.git"
+    "url": "https://github.com/seu-usuario/clic-sistemas-catalog.git"
   },
-  "homepage": "https://pcs-clic-catalog.onrender.com"
+  "homepage": "https://clic-sistemas-catalog.onrender.com"
 }

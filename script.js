@@ -1,4 +1,4 @@
-// Sistema PCs CLIC - Integração com Google Sheets
+// Sistema Clic Sistemas - Integração com Google Sheets
 // URL da planilha fornecida pelo usuário
 const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1b-5Azi9M7ySzPGj0vnyBWL5jdRpKMIhGyH5455B0S0g/edit?usp=sharing';
 
@@ -25,7 +25,7 @@ let cache = {
 };
 
 // Elementos DOM - inicializados após DOM carregar
-let productsGrid, productModal, closeModal, modalBuyButton;
+let productsGrid, productModal, closeModal, modalBuyButton, mobileMenuToggle, nav;
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
@@ -39,10 +39,13 @@ function initializeDOM() {
     productModal = document.getElementById('productModal');
     closeModal = document.getElementById('closeModal');
     modalBuyButton = document.getElementById('modalBuyButton');
+    mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    nav = document.getElementById('nav');
     
     console.log('Elementos DOM inicializados:', {
         productsGrid: !!productsGrid,
-        productModal: !!productModal
+        productModal: !!productModal,
+        mobileMenuToggle: !!mobileMenuToggle
     });
     
     // Event listeners do modal
@@ -56,6 +59,47 @@ function initializeDOM() {
                 closeProductModal();
             }
         });
+    }
+
+    // Event listener do menu mobile
+    if (mobileMenuToggle && nav) {
+        mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+        
+        // Fechar menu ao clicar em um link
+        const navLinks = nav.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+        
+        // Fechar menu ao clicar fora dele
+        document.addEventListener('click', function(e) {
+            if (!nav.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+                closeMobileMenu();
+            }
+        });
+    }
+}
+
+// Funções do menu mobile
+function toggleMobileMenu() {
+    if (nav && mobileMenuToggle) {
+        nav.classList.toggle('active');
+        mobileMenuToggle.classList.toggle('active');
+        
+        // Prevenir scroll do body quando menu estiver aberto
+        if (nav.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+    }
+}
+
+function closeMobileMenu() {
+    if (nav && mobileMenuToggle) {
+        nav.classList.remove('active');
+        mobileMenuToggle.classList.remove('active');
+        document.body.style.overflow = 'auto';
     }
 }
 
@@ -359,7 +403,7 @@ async function forceCorrectData() {
 
 // Inicializar aplicação
 async function initializeApp() {
-    console.log('🚀 Inicializando PCs CLIC com dados da planilha...');
+    console.log('🚀 Inicializando Clic Sistemas com dados da planilha...');
     
     try {
         // Usar os dados da planilha
@@ -540,12 +584,60 @@ window.openProductModal = openProductModal;
 window.closeProductModal = closeProductModal;
 window.buyProduct = buyProduct;
 window.forcarAtualizacaoImediata = forcarAtualizacaoImediata;
+window.toggleMobileMenu = toggleMobileMenu;
+window.closeMobileMenu = closeMobileMenu;
+
+// Detectar dispositivo móvel
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           window.innerWidth <= 768;
+}
+
+// Melhorar experiência touch
+function enhanceTouchExperience() {
+    if (isMobileDevice()) {
+        // Adicionar classe mobile ao body
+        document.body.classList.add('mobile-device');
+        
+        // Melhorar botões para touch
+        const buttons = document.querySelectorAll('.btn, .btn-whatsapp-card, .btn-hero, .btn-whatsapp-contact');
+        buttons.forEach(button => {
+            button.style.minHeight = '44px'; // Tamanho mínimo recomendado para touch
+            button.style.minWidth = '44px';
+        });
+        
+        // Melhorar links de navegação
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.style.minHeight = '44px';
+            link.style.display = 'flex';
+            link.style.alignItems = 'center';
+        });
+        
+        console.log('📱 Experiência mobile otimizada');
+    }
+}
 
 // Executar quando a página carregar
 window.addEventListener('load', () => {
-    console.log('🚀 PCs CLIC - Sistema carregado!');
+    console.log('🚀 Clic Sistemas - Sistema carregado!');
     console.log('📊 Integração com Google Sheets ativa');
     console.log('🔗 URL da planilha:', GOOGLE_SHEETS_URL);
+    
+    // Otimizar para mobile
+    enhanceTouchExperience();
+    
+    // Detectar orientação e redimensionamento
+    window.addEventListener('resize', () => {
+        enhanceTouchExperience();
+    });
+    
+    // Detectar mudança de orientação
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            enhanceTouchExperience();
+        }, 100);
+    });
 });
 
-console.log('🚀 PCs CLIC - Sistema de integração com Google Sheets carregado!');
+console.log('🚀 Clic Sistemas - Sistema de integração com Google Sheets carregado!');

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: pcs-clic-catalog
+    name: clic-sistemas-catalog
     env: static
     buildCommand: npm install && npm run build
     startCommand: npx http-server . -p $PORT

@@ -1,7 +1,7 @@
-# PCs CLIC - Site de Catálogo de Produtos
+# Clic Sistemas - Catálogo de Computadores
 
 ## Descrição
-Site de catálogo de produtos para PCs CLIC, desenvolvido com integração automática ao Google Sheets para sincronização de produtos em tempo real.
+Site de catálogo de computadores da Clic Sistemas, desenvolvido com integração automática ao Google Sheets para sincronização de produtos em tempo real.
 
 ## Características
 - **Design Moderno**: Interface com tema escuro usando cores laranja (#ff6b35) e azul escuro (#2c5aa0)
@@ -270,4 +270,4 @@ Para suporte técnico:
 4. Conectividade de rede
 
 ## Licença
-© 2024 PCs CLIC. Todos os direitos reservados.
+© 2025 Clic Sistemas. Todos os direitos reservados.
